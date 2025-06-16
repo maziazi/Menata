@@ -35,14 +35,9 @@
 			path = Menata;
 			sourceTree = "<group>";
 		};
-		5CBD02B12E0022970007E7DA /* MenataTests */ = {
+		5CBD02CB2E0023850007E7DA /* Packages */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MenataTests;
-			sourceTree = "<group>";
-		};
-		5CBD02BB2E0022970007E7DA /* MenataUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MenataUITests;
+			path = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,9 +70,8 @@
 		5CBD02972E0022960007E7DA = {
 			isa = PBXGroup;
 			children = (
+				5CBD02CB2E0023850007E7DA /* Packages */,
 				5CBD02A22E0022960007E7DA /* Menata */,
-				5CBD02B12E0022970007E7DA /* MenataTests */,
-				5CBD02BB2E0022970007E7DA /* MenataUITests */,
 				5CBD02A12E0022960007E7DA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -109,6 +103,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				5CBD02A22E0022960007E7DA /* Menata */,
+				5CBD02CB2E0023850007E7DA /* Packages */,
 			);
 			name = Menata;
 			packageProductDependencies = (
@@ -130,9 +125,6 @@
 			dependencies = (
 				5CBD02B02E0022970007E7DA /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				5CBD02B12E0022970007E7DA /* MenataTests */,
-			);
 			name = MenataTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +144,6 @@
 			);
 			dependencies = (
 				5CBD02BA2E0022970007E7DA /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				5CBD02BB2E0022970007E7DA /* MenataUITests */,
 			);
 			name = MenataUITests;
 			packageProductDependencies = (
@@ -407,7 +396,6 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.4;
@@ -416,7 +404,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
@@ -446,7 +434,6 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.4;
@@ -455,7 +442,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
