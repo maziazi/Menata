@@ -32,7 +32,6 @@ struct TabBarView: View {
                 }
                 .tag(2)
         }
-        .padding(.vertical, 50)
         .accentColor(.orange)
         .onAppear {
             setupTabBarAppearance()

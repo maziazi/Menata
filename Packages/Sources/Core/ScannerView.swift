@@ -19,13 +19,10 @@ struct ScannerView: View {
                     .foregroundColor(.black)
                 Spacer()
             }
-            .padding(.horizontal, 25)
+            .padding(.horizontal)
             .padding(.top, 10)
             .padding(.bottom, 15)
-        }
-        .background(Color.orange)
-                                               
-        VStack {
+            .background(Color.orange)
             Spacer()
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.systemGray6))
@@ -91,6 +88,10 @@ struct ScannerView: View {
             .padding(.bottom, 30)
         }
         .background(Color(.systemGray6))
+        
+                                        
+            
+            
     }
 }
 
