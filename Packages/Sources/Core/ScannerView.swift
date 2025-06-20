@@ -1,17 +1,11 @@
-//
-//  ScannerView.swift
-//  Menata
-//
-//  Created by Muhamad Azis on 16/06/25.
-//
-
 import SwiftUI
 
 struct ScannerView: View {
-    @State private var showingActionSheet = false
-    
+    @State private var showCameraView = false
+
     var body: some View {
         VStack {
+            // Header
             HStack {
                 Text("Scanner")
                     .font(.largeTitle)
@@ -23,7 +17,10 @@ struct ScannerView: View {
             .padding(.top, 10)
             .padding(.bottom, 15)
             .background(Color.orange)
+
             Spacer()
+
+            // Camera Preview Placeholder
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.systemGray6))
                 .frame(height: 300)
@@ -38,13 +35,15 @@ struct ScannerView: View {
                             .padding(.top, 10)
                     }
                 )
-                    .padding(.horizontal)
-                            
+                .padding(.horizontal)
+
             Spacer()
-                            
+
+            // Buttons
             VStack(spacing: 20) {
+                // This button will now open CameraView (Room Plan Scanner)
                 Button(action: {
-                    print("Room Plan Scanner tapped")
+                    showCameraView = true
                 }) {
                     HStack {
                         Image(systemName: "camera.metering.center.weighted")
@@ -62,11 +61,11 @@ struct ScannerView: View {
                     .cornerRadius(12)
                     .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                 }
-                                
+
+                // You can keep or change this second button
                 Button(action: {
                     print("Object Scanner tapped")
                 }) {
-                
                     HStack {
                         Image(systemName: "camera.metering.spot")
                             .font(.title2)
@@ -88,13 +87,14 @@ struct ScannerView: View {
             .padding(.bottom, 30)
         }
         .background(Color(.systemGray6))
-        
-                                        
-            
-            
+        .navigationBarHidden(true)
+        .fullScreenCover(isPresented: $showCameraView) {
+            CameraView() // Your custom view with AVCaptureSession
+        }
     }
 }
 
 #Preview {
     ScannerView()
 }
+
