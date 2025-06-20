@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct DefaultView: View {
     var body: some View {
         VStack {
             TabBarView()
@@ -17,5 +17,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    DefaultView()
 }

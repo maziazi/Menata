@@ -45,7 +45,6 @@ struct RoomCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 12) {
-                // Room Icon
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(LinearGradient(
@@ -66,7 +65,6 @@ struct RoomCard: View {
                     }
                 }
                 
-                // Room Info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(room.name)
                         .font(.headline)

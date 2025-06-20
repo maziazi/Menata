@@ -35,9 +35,9 @@
 			path = Menata;
 			sourceTree = "<group>";
 		};
-		5CBD02CB2E0023850007E7DA /* Packages */ = {
+		5CBD04B92E041DA80007E7DA /* Sources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Packages;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -70,7 +70,7 @@
 		5CBD02972E0022960007E7DA = {
 			isa = PBXGroup;
 			children = (
-				5CBD02CB2E0023850007E7DA /* Packages */,
+				5CBD04B92E041DA80007E7DA /* Sources */,
 				5CBD02A22E0022960007E7DA /* Menata */,
 				5CBD02A12E0022960007E7DA /* Products */,
 			);
@@ -103,7 +103,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				5CBD02A22E0022960007E7DA /* Menata */,
-				5CBD02CB2E0023850007E7DA /* Packages */,
+				5CBD04B92E041DA80007E7DA /* Sources */,
 			);
 			name = Menata;
 			packageProductDependencies = (

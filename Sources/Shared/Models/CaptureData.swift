@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Room Model
 struct RoomCaptured: Identifiable, Hashable {
     let id = UUID()
     let name: String
@@ -26,7 +25,6 @@ struct RoomCaptured: Identifiable, Hashable {
     }
 }
 
-// MARK: - Object Model
 struct ObjectCaptured: Identifiable, Hashable {
     let id = UUID()
     let name: String
@@ -44,7 +42,6 @@ struct ObjectCaptured: Identifiable, Hashable {
     }
 }
 
-// MARK: - Real Data (Sesuai File yang Ada)
 extension RoomCaptured {
     static let availableRooms: [RoomCaptured] = [
         RoomCaptured(
