@@ -77,7 +77,8 @@ struct ProjectEditView: View {
             Text("Are you sure you want to delete '\(editedProject.displayName)'?\n\nThis action cannot be undone.")
         }
         .fullScreenCover(isPresented: $showCombineView) {
-            CombineView(project:editedProject)
+            CombineView()
+            
         }
     }
 }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CombineCatalogueView View {
+struct CombineCatalogueView: View {
     var body: some View {
         Text("Combine Catalogue View")
     }

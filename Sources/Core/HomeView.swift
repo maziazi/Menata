@@ -13,7 +13,6 @@ struct HomeView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Orange Header
             HStack {
                 Text("Home")
                     .font(.largeTitle)
@@ -26,7 +25,6 @@ struct HomeView: View {
             .padding(.bottom, 15)
             .background(Color.orange)
             
-            // Content with Picker
             VStack(spacing: 0) {
                 // Segmented Picker
                 Picker("View Mode", selection: $selectedSegment) {

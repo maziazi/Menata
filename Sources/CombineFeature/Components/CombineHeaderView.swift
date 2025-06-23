@@ -27,7 +27,7 @@ struct CombineHeaderView: View {
     }
 }
 
-#Preview {
-    CombineHeaderView(project: Project.sampleProjects.first!)
-}
+//#Preview {
+//    CombineHeaderView(project: Project.sampleProjects.first!)
+//}
 

@@ -8,11 +8,8 @@
 import SwiftUI
 
 struct CombineView: View {
-    let project: Project
-    
     var body: some View {
         VStack {
-            CombineHeaderView(project: Project)
             Text("This is Combine View")
                 .font(.largeTitle)
                 .padding()

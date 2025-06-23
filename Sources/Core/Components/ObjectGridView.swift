@@ -46,7 +46,6 @@ struct ObjectCard: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 8) {
-                // Object Icon
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(gradientForObject(object.name))
@@ -63,7 +62,6 @@ struct ObjectCard: View {
                     }
                 }
                 
-                // Object Info
                 VStack(spacing: 2) {
                     Text(object.name)
                         .font(.caption.bold())

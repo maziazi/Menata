@@ -11,7 +11,7 @@ import SwiftUI
 struct MenataApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DefaultView()
         }
     }
 }
