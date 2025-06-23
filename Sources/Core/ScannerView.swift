@@ -6,10 +6,10 @@
 //
 
 import SwiftUI
+import App
 
 struct ScannerView: View {
-    @State private var showingActionSheet = false
-    
+    @State private var isShowingContentView = false
     var body: some View {
         VStack {
             HStack {
@@ -23,7 +23,9 @@ struct ScannerView: View {
             .padding(.top, 10)
             .padding(.bottom, 15)
             .background(Color.orange)
+            
             Spacer()
+            
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(.systemGray6))
                 .frame(height: 300)
@@ -38,10 +40,10 @@ struct ScannerView: View {
                             .padding(.top, 10)
                     }
                 )
-                    .padding(.horizontal)
-                            
+                .padding(.horizontal)
+            
             Spacer()
-                            
+            
             VStack(spacing: 20) {
                 Button(action: {
                     print("Room Plan Scanner tapped")
@@ -62,11 +64,10 @@ struct ScannerView: View {
                     .cornerRadius(12)
                     .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
                 }
-                                
-                Button(action: {
-                    print("Object Scanner tapped")
-                }) {
                 
+                Button(action: {
+                    isShowingContentView = true
+                }) {
                     HStack {
                         Image(systemName: "camera.metering.spot")
                             .font(.title2)
@@ -88,13 +89,8 @@ struct ScannerView: View {
             .padding(.bottom, 30)
         }
         .background(Color(.systemGray6))
-        
-                                        
-            
-            
+        .fullScreenCover(isPresented: $isShowingContentView) {
+            ContentView()
+        }
     }
-}
-
-#Preview {
-    ScannerView()
 }

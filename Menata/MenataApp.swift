@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import App
 
 @main
 struct MenataApp: App {
     var body: some Scene {
         WindowGroup {
             DefaultView()
+//            ContentView()
         }
     }
 }
