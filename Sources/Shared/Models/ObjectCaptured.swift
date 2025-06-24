@@ -15,8 +15,7 @@ struct ObjectCaptured: Identifiable, Hashable {
     let captureDate: Date
     let fileSize: String
     let localURL: URL?
-    
-    // Backward compatibility untuk bundle resources
+
     var usdzURL: URL? {
         // Prioritaskan local file jika ada
         if let localURL = localURL, FileManager.default.fileExists(atPath: localURL.path) {
@@ -40,7 +39,7 @@ struct ObjectCaptured: Identifiable, Hashable {
         self.localURL = localURL
     }
     
-    // Initializer untuk backward compatibility (bundle resources)
+    // Initializer untuk bundle resources
     init(name: String, fileName: String, usdzFileName: String, captureDate: Date, fileSize: String) {
         self.name = name
         self.fileName = fileName
@@ -51,52 +50,48 @@ struct ObjectCaptured: Identifiable, Hashable {
     }
 }
 
-// MARK: - Static Data (Fallback)
+@MainActor
 extension ObjectCaptured {
     static var availableObjects: [ObjectCaptured] {
-        // Ambil dari file system terlebih dahulu
+        var allObjects: [ObjectCaptured] = []
+        
         let fileSystemObjects = FileSystemManager.shared.getObjectsFromFileSystem()
+        allObjects.append(contentsOf: fileSystemObjects)
         
-        // Jika tidak ada di file system, gunakan fallback data
-        if fileSystemObjects.isEmpty {
-            return fallbackObjects
-        }
+        let bundleObjects = getBundleObjects()
         
-        return fileSystemObjects
+        let existingFileNames = Set(fileSystemObjects.map { $0.usdzFileName })
+        let uniqueBundleObjects = bundleObjects.filter { !existingFileNames.contains($0.usdzFileName) }
+        
+        allObjects.append(contentsOf: uniqueBundleObjects)
+        
+        return allObjects.sorted { $0.captureDate > $1.captureDate }
     }
     
-    private static let fallbackObjects: [ObjectCaptured] = [
-        ObjectCaptured(
-            name: "Kursi",
-            fileName: "kursi_scan",
-            usdzFileName: "Kursi",
-            captureDate: Date().addingTimeInterval(-43200), // 12 hours ago
-            fileSize: getFileSize(fileName: "Kursi")
-        ),
-        ObjectCaptured(
-            name: "Vanesh",
-            fileName: "vanesh_scan",
-            usdzFileName: "Vanesh",
-            captureDate: Date().addingTimeInterval(-86400), // 1 day ago
-            fileSize: getFileSize(fileName: "Vanesh")
-        ),
-        ObjectCaptured(
-            name: "Kursi Kotak",
-            fileName: "kursi_kotak_scan",
-            usdzFileName: "KursiKotak",
-            captureDate: Date().addingTimeInterval(-129600), // 1.5 days ago
-            fileSize: getFileSize(fileName: "KursiKotak")
-        ),
-        ObjectCaptured(
-            name: "Kursi Kotak 1",
-            fileName: "kursi_kotak1_scan",
-            usdzFileName: "KursiKotak1",
-            captureDate: Date().addingTimeInterval(-172800), // 2 days ago
-            fileSize: getFileSize(fileName: "KursiKoTAK1")
-        )
-    ]
+    private static func getBundleObjects() -> [ObjectCaptured] {
+        let bundleFiles = [
+            ("Kursi", "kursi_scan", "Kursi"),
+            ("Vanesh", "vanesh_scan", "Vanesh"),
+            ("Kursi Kotak", "kursi_kotak_scan", "KursiKotak"),
+            ("Kursi Kotak 1", "kursi_kotak1_scan", "KursiKoTAK1")
+        ]
+        
+        return bundleFiles.compactMap { (name, fileName, usdzName) in
+            guard Bundle.main.url(forResource: usdzName, withExtension: "usdz") != nil else {
+                return nil
+            }
+            
+            return ObjectCaptured(
+                name: name,
+                fileName: fileName,
+                usdzFileName: usdzName,
+                captureDate: Date().addingTimeInterval(-Double.random(in: 43200...604800)), // Random date within last week
+                fileSize: getBundleFileSize(fileName: usdzName)
+            )
+        }
+    }
     
-    private static func getFileSize(fileName: String) -> String {
+    private static func getBundleFileSize(fileName: String) -> String {
         guard let url = Bundle.main.url(forResource: fileName, withExtension: "usdz"),
               let attributes = try? FileManager.default.attributesOfItem(atPath: url.path),
               let fileSize = attributes[.size] as? NSNumber else {
@@ -104,6 +99,11 @@ extension ObjectCaptured {
         }
         
         let sizeInMB = Double(fileSize.intValue) / (1024 * 1024)
-        return String(format: "%.1f MB", sizeInMB)
+        if sizeInMB < 1.0 {
+            let sizeInKB = Double(fileSize.intValue) / 1024
+            return String(format: "%.0f KB", sizeInKB)
+        } else {
+            return String(format: "%.1f MB", sizeInMB)
+        }
     }
 }

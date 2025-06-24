@@ -11,17 +11,23 @@ import SwiftUI
 @MainActor
 class ProjectViewModel: ObservableObject {
     @Published var projects: [Project] = []
-    @Published var availableRooms: [RoomCaptured] = []
-    @Published var availableObjects: [ObjectCaptured] = [] 
     @Published var showingCreateProject = false
     @Published var selectedProject: Project?
     @Published var isLoading = false
     
     private let projectsKey = "SavedProjects"
     
+    // Computed properties untuk akses data terbaru
+    var availableRooms: [RoomCaptured] {
+        RoomCaptured.availableRooms.filter { $0.isAvailable }
+    }
+    
+    var availableObjects: [ObjectCaptured] {
+        ObjectCaptured.availableObjects.filter { $0.isAvailable }
+    }
+    
     init() {
         loadProjects()
-        loadAvailableData()
     }
     
     func loadProjects() {
@@ -31,6 +37,9 @@ class ProjectViewModel: ObservableObject {
             if let data = UserDefaults.standard.data(forKey: self.projectsKey),
                let decodedProjects = try? JSONDecoder().decode([Project].self, from: data) {
                 self.projects = decodedProjects
+                
+                // Update projects yang room-nya mungkin sudah tidak ada
+                self.validateProjectRooms()
             }
             
             self.isLoading = false
@@ -38,18 +47,23 @@ class ProjectViewModel: ObservableObject {
         }
     }
     
-    func loadAvailableData() {
-        availableRooms = RoomCaptured.availableRooms.filter { $0.isAvailable }
-        availableObjects = ObjectCaptured.availableObjects.filter { $0.isAvailable }
+    private func validateProjectRooms() {
+        var hasChanges = false
         
-        print("📱 Loaded \(availableRooms.count) rooms and \(availableObjects.count) objects")
-        
-        for room in availableRooms {
-            print("✅ Available Room: \(room.name) - \(room.usdzFileName).usdz (\(room.fileSize))")
+        for (index, project) in projects.enumerated() {
+            if let roomId = project.selectedRoomId {
+                // Check apakah room masih tersedia
+                let roomExists = availableRooms.contains { $0.id.uuidString == roomId }
+                if !roomExists {
+                    print("⚠️ Room for project '\(project.displayName)' no longer exists")
+                    projects[index].selectedRoomId = nil
+                    hasChanges = true
+                }
+            }
         }
         
-        for object in availableObjects {
-            print("✅ Available Object: \(object.name) - \(object.usdzFileName).usdz (\(object.fileSize))")
+        if hasChanges {
+            saveProjects()
         }
     }
     
@@ -69,17 +83,17 @@ class ProjectViewModel: ObservableObject {
     }
     
     func deleteProject(_ project: Project) {
-            projects.removeAll { $0.id == project.id }
-            
-            saveProjects()
-            
-            if selectedProject?.id == project.id {
-                selectedProject = nil
-            }
-            
-            print("🗑️ Deleted project: '\(project.displayName)' (ID: \(project.id))")
-            print("📊 Remaining projects: \(projects.count)")
+        projects.removeAll { $0.id == project.id }
+        
+        saveProjects()
+        
+        if selectedProject?.id == project.id {
+            selectedProject = nil
         }
+        
+        print("🗑️ Deleted project: '\(project.displayName)' (ID: \(project.id))")
+        print("📊 Remaining projects: \(projects.count)")
+    }
     
     func updateProject(_ project: Project) {
         if let index = projects.firstIndex(where: { $0.id == project.id }) {
@@ -108,7 +122,6 @@ class ProjectViewModel: ObservableObject {
     
     func refreshData() {
         loadProjects()
-        loadAvailableData()
     }
     
     func getRoomById(_ roomId: String?) -> RoomCaptured? {
@@ -122,4 +135,14 @@ class ProjectViewModel: ObservableObject {
         let withoutRooms = total - withRooms
         return (total, withRooms, withoutRooms)
     }
+    
+    func getDataSourceStats() -> (fileSystemRooms: Int, bundleRooms: Int, fileSystemObjects: Int, bundleObjects: Int) {
+        let fileSystemRooms = availableRooms.filter { $0.localURL != nil }.count
+        let bundleRooms = availableRooms.filter { $0.localURL == nil }.count
+        let fileSystemObjects = availableObjects.filter { $0.localURL != nil }.count
+        let bundleObjects = availableObjects.filter { $0.localURL == nil }.count
+        
+        return (fileSystemRooms, bundleRooms, fileSystemObjects, bundleObjects)
+    }
 }
+

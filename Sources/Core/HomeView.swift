@@ -13,31 +13,10 @@ struct HomeView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Home")
-                    .font(.largeTitle)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.black)
-                Spacer()
-            }
-            .padding(.horizontal, 25)
-            .padding(.top, 10)
-            .padding(.bottom, 15)
-            .background(Color.orange)
+            headerView
             
             VStack(spacing: 0) {
-                // Segmented Picker
-                Picker("View Mode", selection: $selectedSegment) {
-                    ForEach(0..<segments.count, id: \.self) { index in
-                        Text(segments[index]).tag(index)
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-                .padding(.top, 15)
-                .padding(.bottom, 10)
-                
-                // Dynamic Content based on selection and data availability
+                segmentedPickerView
                 contentView
             }
             .background(Color(.systemBackground))
@@ -50,6 +29,61 @@ struct HomeView: View {
         }
     }
     
+    private var headerView: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Home")
+                    .font(.largeTitle)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.black)
+                
+                // Data source indicators
+                if !viewModel.isLoading {
+                    let stats = viewModel.getFileSystemItemsCount()
+                    let bundleStats = viewModel.getBundleItemsCount()
+                    
+                    HStack(spacing: 12) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "externaldrive.fill")
+                                .font(.caption2)
+                                .foregroundColor(.green)
+                            Text("Captured: \(stats.rooms + stats.objects)")
+                                .font(.caption2)
+                                .foregroundColor(.black)
+                        }
+                        
+                        HStack(spacing: 4) {
+                            Image(systemName: "app.badge")
+                                .font(.caption2)
+                                .foregroundColor(.blue)
+                            Text("Samples: \(bundleStats.rooms + bundleStats.objects)")
+                                .font(.caption2)
+                                .foregroundColor(.black)
+                        }
+                    }
+                }
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, 25)
+        .padding(.top, 10)
+        .padding(.bottom, 15)
+        .background(Color.orange)
+    }
+    
+    private var segmentedPickerView: some View {
+        Picker("View Mode", selection: $selectedSegment) {
+            ForEach(0..<segments.count, id: \.self) { index in
+                Text(segments[index]).tag(index)
+            }
+        }
+        .pickerStyle(SegmentedPickerStyle())
+        .padding(.horizontal)
+        .padding(.top, 15)
+        .padding(.bottom, 10)
+    }
+    
     @ViewBuilder
     private var contentView: some View {
         if viewModel.isLoading {
@@ -60,7 +94,7 @@ struct HomeView: View {
                 emptyStateView(
                     icon: "house",
                     title: "No Room has been scanned",
-                    subtitle: "Looking for Room1.usdz and Room.usdz files",
+                    subtitle: "Check Documents/Rooms/Models/ or add sample files",
                     type: "Room"
                 )
             } else {
@@ -72,7 +106,7 @@ struct HomeView: View {
                 emptyStateView(
                     icon: "cube",
                     title: "No Object has been scanned",
-                    subtitle: "Looking for Kursi.usdz, Vanesh.usdz, KursiKotak.usdz, KursiKoTAK1.usdz",
+                    subtitle: "Check Documents/Objects/Models/ or add sample files",
                     type: "Object"
                 )
             } else {
@@ -95,7 +129,7 @@ struct HomeView: View {
                     .font(.body)
                     .foregroundColor(.secondary)
                 
-                Text("Looking for USDZ files in bundle")
+                Text("Looking for USDZ files in Documents and Bundle")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -122,7 +156,7 @@ struct HomeView: View {
                 
                 // Additional info about expected files
                 VStack(spacing: 8) {
-                    Text("Expected files:")
+                    Text("Data Sources:")
                         .font(.caption.bold())
                         .foregroundColor(.primary)
                     
@@ -167,9 +201,18 @@ struct HomeView: View {
                     .font(.title3)
                     .foregroundColor(.orange)
                 
-                Text("Captured Rooms: \(viewModel.rooms.count)")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                let fileSystemCount = viewModel.rooms.filter { $0.localURL != nil }.count
+                let bundleCount = viewModel.rooms.filter { $0.localURL == nil }.count
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Captured Rooms: \(viewModel.rooms.count)")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Text("📁 \(fileSystemCount) captured, 📦 \(bundleCount) samples")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
                 
                 Spacer()
                 
@@ -184,7 +227,9 @@ struct HomeView: View {
             .background(Color(.systemGray6))
             
             // Room Grid
-            RoomGridView(rooms: viewModel.rooms)
+            RoomGridView(rooms: viewModel.rooms) {
+                viewModel.refreshData()
+            }
         }
     }
     
@@ -197,9 +242,18 @@ struct HomeView: View {
                     .font(.title3)
                     .foregroundColor(.orange)
                 
-                Text("Captured Objects: \(viewModel.objects.count)")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                let fileSystemCount = viewModel.objects.filter { $0.localURL != nil }.count
+                let bundleCount = viewModel.objects.filter { $0.localURL == nil }.count
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Captured Objects: \(viewModel.objects.count)")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Text("📁 \(fileSystemCount) captured, 📦 \(bundleCount) samples")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
                 
                 Spacer()
                 
@@ -214,7 +268,9 @@ struct HomeView: View {
             .background(Color(.systemGray6))
             
             // Object Grid
-            ObjectGridView(objects: viewModel.objects)
+            ObjectGridView(objects: viewModel.objects) {
+                viewModel.refreshData()
+            }
         }
     }
 }

@@ -54,15 +54,77 @@ struct ProjectView: View {
                 viewModel.showingCreateProject = true
             }
         } else {
-            ProjectGridView(
-                projects: viewModel.projects,
-                availableRooms: viewModel.availableRooms
-            ) { project in
-                viewModel.selectedProject = project
-            } onDeleteProject: { project in
-                viewModel.deleteProject(project)
+            VStack(spacing: 0) {
+                // Stats Section
+                projectStatsView
+                
+                ProjectGridView(
+                    projects: viewModel.projects,
+                    availableRooms: viewModel.availableRooms
+                ) { project in
+                    viewModel.selectedProject = project
+                } onDeleteProject: { project in
+                    viewModel.deleteProject(project)
+                }
             }
         }
+    }
+    
+    private var projectStatsView: some View {
+        VStack(spacing: 8) {
+            let stats = viewModel.getProjectStats()
+            let dataStats = viewModel.getDataSourceStats()
+            
+            HStack {
+                Image(systemName: "folder.fill")
+                    .font(.title3)
+                    .foregroundColor(.orange)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Projects: \(stats.total)")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    Text("\(stats.withRooms) with rooms, \(stats.withoutRooms) empty")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Button("Refresh") {
+                    viewModel.refreshData()
+                }
+                .font(.caption)
+                .foregroundColor(.orange)
+            }
+            
+            // Data source info
+            HStack(spacing: 16) {
+                HStack(spacing: 4) {
+                    Image(systemName: "externaldrive.fill")
+                        .font(.caption2)
+                        .foregroundColor(.green)
+                    Text("Captured Rooms: \(dataStats.fileSystemRooms)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                
+                HStack(spacing: 4) {
+                    Image(systemName: "app.badge")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                    Text("Sample Rooms: \(dataStats.bundleRooms)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 12)
+        .background(Color(.systemGray6))
     }
 }
 

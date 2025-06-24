@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 struct Project: Identifiable, Codable {
     let id: UUID
     var name: String
@@ -51,6 +52,17 @@ struct Project: Identifiable, Codable {
     }
     
     var hasRoom: Bool {
-        return selectedRoomId != nil
+        return selectedRoomId != nil && selectedRoom != nil
+    }
+    
+    var roomSource: String? {
+        guard let room = selectedRoom else { return nil }
+        return room.localURL != nil ? "Captured" : "Sample"
     }
 }
+
+// MARK: - Sample Data
+extension Project {
+    static let sampleProjects: [Project] = []
+}
+
