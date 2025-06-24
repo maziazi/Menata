@@ -3,6 +3,7 @@
 //
 //
 //  Created by 日野森寛也 on 2024/04/14.
+//  Edited by Muhamad Azis pm 2025/06/24
 //
 
 import SwiftUI
@@ -75,7 +76,7 @@ struct FinishedOverlayButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(20)
             .foregroundStyle(.white)
-            .background(.blue)
+            .background(.orange)
             .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }

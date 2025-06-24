@@ -3,6 +3,7 @@
 //
 //
 //  Created by 日野森寛也 on 2024/04/09.
+//  Edited by Muhamad Azis pm 2025/06/24
 //
 
 import SwiftUI
@@ -11,9 +12,11 @@ import Common
 
 public struct CaptureView: View {
     @State var model: CapturingModel
+    let onDismiss: () -> Void // Tambahkan parameter untuk kembali ke ScannerView
     
-    public init(model: CapturingModel) {
+    public init(model: CapturingModel, onDismiss: @escaping () -> Void) {
         self.model = model
+        self.onDismiss = onDismiss
     }
 
     public var body: some View {
@@ -25,7 +28,13 @@ public struct CaptureView: View {
                     if model.isShowOverlay {
                         switch model.state {
                         case .start:
-                            StartingOverlayView { await model.startDetection() }
+                            StartingOverlayView(
+                                centerHandler: { await model.startDetection() },
+                                dismissAction: {
+                                    model.cancel()
+                                    onDismiss() // Kembali ke ScannerView
+                                }
+                            )
                         case .detecting:
                             DetectingOverlayView { await model.startCapture() } cancelHandler: { await model.cancel() }
                         case .capturing:
@@ -51,6 +60,7 @@ public struct CaptureView: View {
                 title: .init("Something Error!!!!"),
                 dismissButton: .destructive(.init("OK"), action: {
                     model.cancel()
+                    onDismiss() // Kembali ke ScannerView saat error
                 })
             )
         })
