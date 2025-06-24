@@ -1,29 +1,11 @@
 //
-//  CaptureData.swift
+//  ObjecrCaptures.swift
 //  Menata
 //
-//  Created by Muhamad Azis on 17/06/25.
+//  Created by Muhamad Azis on 24/06/25.
 //
 
 import Foundation
-import SwiftUI
-
-struct RoomCaptured: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
-    let fileName: String
-    let usdzFileName: String
-    let captureDate: Date
-    let fileSize: String
-    
-    var usdzURL: URL? {
-        Bundle.main.url(forResource: usdzFileName, withExtension: "usdz")
-    }
-    
-    var isAvailable: Bool {
-        return usdzURL != nil
-    }
-}
 
 struct ObjectCaptured: Identifiable, Hashable {
     let id = UUID()
@@ -32,48 +14,58 @@ struct ObjectCaptured: Identifiable, Hashable {
     let usdzFileName: String
     let captureDate: Date
     let fileSize: String
+    let localURL: URL?
     
+    // Backward compatibility untuk bundle resources
     var usdzURL: URL? {
-        Bundle.main.url(forResource: usdzFileName, withExtension: "usdz")
+        // Prioritaskan local file jika ada
+        if let localURL = localURL, FileManager.default.fileExists(atPath: localURL.path) {
+            return localURL
+        }
+        // Fallback ke bundle resource
+        return Bundle.main.url(forResource: usdzFileName, withExtension: "usdz")
     }
     
     var isAvailable: Bool {
         return usdzURL != nil
     }
-}
-
-extension RoomCaptured {
-    static let availableRooms: [RoomCaptured] = [
-        RoomCaptured(
-            name: "Room 1",
-            fileName: "room1_scan",
-            usdzFileName: "Room1",
-            captureDate: Date().addingTimeInterval(-86400), // 1 day ago
-            fileSize: getFileSize(fileName: "Room1")
-        ),
-        RoomCaptured(
-            name: "Room 2",
-            fileName: "room2_scan",
-            usdzFileName: "Room2",
-            captureDate: Date().addingTimeInterval(-172800), // 2 days ago
-            fileSize: getFileSize(fileName: "Room")
-        )
-    ]
     
-    private static func getFileSize(fileName: String) -> String {
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "usdz"),
-              let attributes = try? FileManager.default.attributesOfItem(atPath: url.path),
-              let fileSize = attributes[.size] as? NSNumber else {
-            return "Unknown"
-        }
-        
-        let sizeInMB = Double(fileSize.intValue) / (1024 * 1024)
-        return String(format: "%.1f MB", sizeInMB)
+    // Initializer untuk file system
+    init(name: String, fileName: String, usdzFileName: String, captureDate: Date, fileSize: String, localURL: URL?) {
+        self.name = name
+        self.fileName = fileName
+        self.usdzFileName = usdzFileName
+        self.captureDate = captureDate
+        self.fileSize = fileSize
+        self.localURL = localURL
+    }
+    
+    // Initializer untuk backward compatibility (bundle resources)
+    init(name: String, fileName: String, usdzFileName: String, captureDate: Date, fileSize: String) {
+        self.name = name
+        self.fileName = fileName
+        self.usdzFileName = usdzFileName
+        self.captureDate = captureDate
+        self.fileSize = fileSize
+        self.localURL = nil
     }
 }
 
+// MARK: - Static Data (Fallback)
 extension ObjectCaptured {
-    static let availableObjects: [ObjectCaptured] = [
+    static var availableObjects: [ObjectCaptured] {
+        // Ambil dari file system terlebih dahulu
+        let fileSystemObjects = FileSystemManager.shared.getObjectsFromFileSystem()
+        
+        // Jika tidak ada di file system, gunakan fallback data
+        if fileSystemObjects.isEmpty {
+            return fallbackObjects
+        }
+        
+        return fileSystemObjects
+    }
+    
+    private static let fallbackObjects: [ObjectCaptured] = [
         ObjectCaptured(
             name: "Kursi",
             fileName: "kursi_scan",
