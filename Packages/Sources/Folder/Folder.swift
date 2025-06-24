@@ -10,7 +10,7 @@ import os
 
 @MainActor
 public struct Folder {
-    static let logger = Logger(subsystem: "MenataApp", category: "Folder")
+    static let logger = Logger(subsystem: "MenataApp", category: "ObjectFolder")
 
     public let rootScanFolder: URL = {
         let documentsFolder = try! FileManager.default.url(
@@ -19,7 +19,7 @@ public struct Folder {
             appropriateFor: nil,
             create: true
         )
-        return documentsFolder.appendingPathComponent("Scans/", isDirectory: true)
+        return documentsFolder.appendingPathComponent("Objects/", isDirectory: true)
     }()
     
     public let imagesFolder: URL
