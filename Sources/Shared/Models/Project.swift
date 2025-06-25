@@ -15,6 +15,7 @@ struct Project: Identifiable, Codable {
     let createdDate: Date
     var lastModified: Date
     var thumbnailData: Data?
+    var projectFolderPath: String?
     
     var selectedRoom: RoomCaptured? {
         get {
@@ -33,6 +34,7 @@ struct Project: Identifiable, Codable {
         case createdDate
         case lastModified
         case thumbnailData
+        case projectFolderPath
     }
     
     init(id: UUID = UUID(), name: String, selectedRoomId: String? = nil, selectedRoom: RoomCaptured? = nil) {
@@ -41,6 +43,7 @@ struct Project: Identifiable, Codable {
         self.selectedRoomId = selectedRoomId
         self.createdDate = Date()
         self.lastModified = Date()
+        self.projectFolderPath = nil
         
         if let room = selectedRoom {
             self.selectedRoomId = room.id.uuidString
@@ -59,10 +62,35 @@ struct Project: Identifiable, Codable {
         guard let room = selectedRoom else { return nil }
         return room.localURL != nil ? "Captured" : "Sample"
     }
+    
+    // MARK: - File Manager Properties
+    var projectDirectoryURL: URL? {
+        guard let folderPath = projectFolderPath else { return nil }
+        return URL(fileURLWithPath: folderPath)
+    }
+    
+    var projectMetadataURL: URL? {
+        return projectDirectoryURL?.appendingPathComponent("project.json")
+    }
+    
+    var projectThumbnailURL: URL? {
+        return projectDirectoryURL?.appendingPathComponent("thumbnail.png")
+    }
+    
+    var assetsDirectoryURL: URL? {
+        return projectDirectoryURL?.appendingPathComponent("Assets")
+    }
+    
+    var roomUsdzURL: URL? {
+        return assetsDirectoryURL?.appendingPathComponent("room.usdz")
+    }
+    
+    var objectUsdzURL: URL? {
+        return assetsDirectoryURL?.appendingPathComponent("object.usdz")
+    }
 }
 
 // MARK: - Sample Data
 extension Project {
     static let sampleProjects: [Project] = []
 }
-

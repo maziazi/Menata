@@ -29,7 +29,6 @@ struct RoomCaptured: Identifiable, Hashable {
         return usdzURL != nil
     }
     
-    // Initializer untuk file system
     init(name: String, fileName: String, usdzFileName: String, captureDate: Date, fileSize: String, localURL: URL?) {
         self.name = name
         self.fileName = fileName
@@ -39,7 +38,6 @@ struct RoomCaptured: Identifiable, Hashable {
         self.localURL = localURL
     }
     
-    // Initializer untuk bundle resources
     init(name: String, fileName: String, usdzFileName: String, captureDate: Date, fileSize: String) {
         self.name = name
         self.fileName = fileName
@@ -55,20 +53,16 @@ extension RoomCaptured {
     static var availableRooms: [RoomCaptured] {
         var allRooms: [RoomCaptured] = []
         
-        // 1. Ambil dari file system terlebih dahulu
         let fileSystemRooms = FileSystemManager.shared.getRoomsFromFileSystem()
         allRooms.append(contentsOf: fileSystemRooms)
         
-        // 2. Tambahkan fallback bundle data jika diperlukan
         let bundleRooms = getBundleRooms()
         
-        // Hindari duplikasi berdasarkan nama file
         let existingFileNames = Set(fileSystemRooms.map { $0.usdzFileName })
         let uniqueBundleRooms = bundleRooms.filter { !existingFileNames.contains($0.usdzFileName) }
         
         allRooms.append(contentsOf: uniqueBundleRooms)
         
-        // Sort berdasarkan capture date terbaru
         return allRooms.sorted { $0.captureDate > $1.captureDate }
     }
     
@@ -87,7 +81,7 @@ extension RoomCaptured {
                 name: name,
                 fileName: fileName,
                 usdzFileName: usdzName,
-                captureDate: Date().addingTimeInterval(-Double.random(in: 86400...604800)), // Random date within last week
+                captureDate: Date().addingTimeInterval(-Double.random(in: 86400...604800)), 
                 fileSize: getBundleFileSize(fileName: usdzName)
             )
         }

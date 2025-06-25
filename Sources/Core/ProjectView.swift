@@ -84,10 +84,6 @@ struct ProjectView: View {
                     Text("Projects: \(stats.total)")
                         .font(.headline)
                         .foregroundColor(.primary)
-                    
-                    Text("\(stats.withRooms) with rooms, \(stats.withoutRooms) empty")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
                 }
                 
                 Spacer()

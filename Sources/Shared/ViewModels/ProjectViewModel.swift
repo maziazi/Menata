@@ -14,8 +14,9 @@ class ProjectViewModel: ObservableObject {
     @Published var showingCreateProject = false
     @Published var selectedProject: Project?
     @Published var isLoading = false
+    @Published var errorMessage: String?
     
-    private let projectsKey = "SavedProjects"
+    private let projectFileManager = ProjectFileManager.shared
     
     // Computed properties untuk akses data terbaru
     var availableRooms: [RoomCaptured] {
@@ -32,18 +33,20 @@ class ProjectViewModel: ObservableObject {
     
     func loadProjects() {
         isLoading = true
+        errorMessage = nil
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            if let data = UserDefaults.standard.data(forKey: self.projectsKey),
-               let decodedProjects = try? JSONDecoder().decode([Project].self, from: data) {
-                self.projects = decodedProjects
-                
-                // Update projects yang room-nya mungkin sudah tidak ada
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            do {
+                self.projects = try self.projectFileManager.loadAllProjects()
                 self.validateProjectRooms()
+                print("📁 Loaded \(self.projects.count) projects from file system")
+            } catch {
+                print("❌ Failed to load projects: \(error)")
+                self.errorMessage = "Failed to load projects: \(error.localizedDescription)"
+                self.projects = []
             }
             
             self.isLoading = false
-            print("📁 Loaded \(self.projects.count) projects from storage")
         }
     }
     
@@ -52,7 +55,6 @@ class ProjectViewModel: ObservableObject {
         
         for (index, project) in projects.enumerated() {
             if let roomId = project.selectedRoomId {
-                // Check apakah room masih tersedia
                 let roomExists = availableRooms.contains { $0.id.uuidString == roomId }
                 if !roomExists {
                     print("⚠️ Room for project '\(project.displayName)' no longer exists")
@@ -63,54 +65,129 @@ class ProjectViewModel: ObservableObject {
         }
         
         if hasChanges {
-            saveProjects()
+            // Update projects that need room validation
+            for project in projects {
+                do {
+                    try projectFileManager.saveProjectMetadata(project)
+                } catch {
+                    print("❌ Failed to update project metadata: \(error)")
+                }
+            }
         }
     }
     
     func createProject(name: String, selectedRoom: RoomCaptured?) {
+        isLoading = true
+        errorMessage = nil
+        
         let projectName = name.isEmpty ? generateDefaultName() : name
         
-        let newProject = Project(
+        var newProject = Project(
             name: projectName,
             selectedRoomId: selectedRoom?.id.uuidString,
             selectedRoom: selectedRoom
         )
         
-        projects.append(newProject)
-        saveProjects()
+        do {
+            // Create project directory structure
+            let projectPath = try projectFileManager.createProjectDirectory(for: newProject)
+            newProject.projectFolderPath = projectPath
+            
+            // Copy room file if selected
+            if let room = selectedRoom {
+                try projectFileManager.copyRoomFile(from: room, to: newProject)
+            }
+            
+            // Save project metadata
+            try projectFileManager.saveProjectMetadata(newProject)
+            
+            // Generate and save thumbnail (placeholder for now)
+            if let placeholderImage = generatePlaceholderThumbnail(for: newProject) {
+                try projectFileManager.saveThumbnail(placeholderImage, for: newProject)
+            }
+            
+            // Add to projects array
+            projects.insert(newProject, at: 0) // Add to beginning for newest first
+            
+            print("✅ Successfully created project: \(projectName)")
+            print("   - Project folder: \(projectPath)")
+            print("   - Room: \(selectedRoom?.name ?? "None")")
+            
+        } catch {
+            print("❌ Failed to create project: \(error)")
+            errorMessage = "Failed to create project: \(error.localizedDescription)"
+        }
         
-        print("🆕 Created project: \(projectName) with room: \(selectedRoom?.name ?? "None")")
+        isLoading = false
     }
     
     func deleteProject(_ project: Project) {
-        projects.removeAll { $0.id == project.id }
-        
-        saveProjects()
-        
-        if selectedProject?.id == project.id {
-            selectedProject = nil
+        do {
+            // Delete from file system
+            try projectFileManager.deleteProject(project)
+            
+            // Remove from array
+            projects.removeAll { $0.id == project.id }
+            
+            // Clear selection if needed
+            if selectedProject?.id == project.id {
+                selectedProject = nil
+            }
+            
+            print("🗑️ Successfully deleted project: '\(project.displayName)'")
+            
+        } catch {
+            print("❌ Failed to delete project: \(error)")
+            errorMessage = "Failed to delete project: \(error.localizedDescription)"
         }
-        
-        print("🗑️ Deleted project: '\(project.displayName)' (ID: \(project.id))")
-        print("📊 Remaining projects: \(projects.count)")
     }
     
     func updateProject(_ project: Project) {
-        if let index = projects.firstIndex(where: { $0.id == project.id }) {
+        do {
+            // Update last modified date
             var updatedProject = project
             updatedProject.lastModified = Date()
-            projects[index] = updatedProject
-            saveProjects()
-            print("✏️ Updated project: \(project.displayName)")
+            
+            // Save metadata to file system
+            try projectFileManager.saveProjectMetadata(updatedProject)
+            
+            // Update in array
+            if let index = projects.firstIndex(where: { $0.id == project.id }) {
+                projects[index] = updatedProject
+            }
+            
+            print("✏️ Successfully updated project: \(project.displayName)")
+            
+        } catch {
+            print("❌ Failed to update project: \(error)")
+            errorMessage = "Failed to update project: \(error.localizedDescription)"
         }
     }
     
-    private func saveProjects() {
+    func updateProjectRoom(_ project: Project, newRoom: RoomCaptured?) {
         do {
-            let encoded = try JSONEncoder().encode(projects)
-            UserDefaults.standard.set(encoded, forKey: projectsKey)
+            var updatedProject = project
+            updatedProject.selectedRoom = newRoom
+            updatedProject.lastModified = Date()
+            
+            // Copy new room file if provided
+            if let room = newRoom {
+                try projectFileManager.copyRoomFile(from: room, to: updatedProject)
+            }
+            
+            // Save updated metadata
+            try projectFileManager.saveProjectMetadata(updatedProject)
+            
+            // Update in array
+            if let index = projects.firstIndex(where: { $0.id == project.id }) {
+                projects[index] = updatedProject
+            }
+            
+            print("🏠 Successfully updated room for project: \(project.displayName)")
+            
         } catch {
-            print("❌ Failed to save projects: \(error)")
+            print("❌ Failed to update project room: \(error)")
+            errorMessage = "Failed to update project room: \(error.localizedDescription)"
         }
     }
     
@@ -118,6 +195,46 @@ class ProjectViewModel: ObservableObject {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd, yyyy 'at' HH:mm"
         return "Project \(formatter.string(from: Date()))"
+    }
+    
+    private func generatePlaceholderThumbnail(for project: Project) -> UIImage? {
+        let size = CGSize(width: 300, height: 200)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        
+        return renderer.image { context in
+            // Background gradient
+            let colors = project.hasRoom ?
+                [UIColor.systemOrange.withAlphaComponent(0.8), UIColor.systemOrange.withAlphaComponent(0.4)] :
+                [UIColor.systemGray.withAlphaComponent(0.8), UIColor.systemGray.withAlphaComponent(0.4)]
+            
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let gradient = CGGradient(colorsSpace: colorSpace, colors: [colors[0].cgColor, colors[1].cgColor] as CFArray, locations: [0.0, 1.0])
+            
+            context.cgContext.drawLinearGradient(gradient!, start: CGPoint(x: 0, y: 0), end: CGPoint(x: size.width, y: size.height), options: [])
+            
+            // Add icon and text
+            let icon = project.hasRoom ? "house.fill" : "folder.fill"
+            let iconConfig = UIImage.SymbolConfiguration(pointSize: 40, weight: .bold)
+            let iconImage = UIImage(systemName: icon, withConfiguration: iconConfig)?
+                .withTintColor(.white, renderingMode: .alwaysOriginal)
+            
+            if let icon = iconImage {
+                let iconRect = CGRect(x: (size.width - 40) / 2, y: (size.height - 40) / 2 - 20, width: 40, height: 40)
+                icon.draw(in: iconRect)
+            }
+            
+            // Add project name
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 12, weight: .bold),
+                .foregroundColor: UIColor.white
+            ]
+            
+            let text = project.displayName
+            let textSize = text.size(withAttributes: attributes)
+            let textRect = CGRect(x: (size.width - textSize.width) / 2, y: size.height - 30, width: textSize.width, height: textSize.height)
+            
+            text.draw(in: textRect, withAttributes: attributes)
+        }
     }
     
     func refreshData() {
@@ -143,6 +260,14 @@ class ProjectViewModel: ObservableObject {
         let bundleObjects = availableObjects.filter { $0.localURL == nil }.count
         
         return (fileSystemRooms, bundleRooms, fileSystemObjects, bundleObjects)
+    }
+    
+    func getStorageInfo() -> String {
+        return projectFileManager.getProjectsDirectorySize()
+    }
+    
+    func clearErrorMessage() {
+        errorMessage = nil
     }
 }
 

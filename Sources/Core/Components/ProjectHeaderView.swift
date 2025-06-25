@@ -14,7 +14,7 @@ struct ProjectHeaderView: View {
         VStack {
             HStack {
                 Text("Project")
-                    .font(.title2)
+                    .font(.largeTitle)
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
                 

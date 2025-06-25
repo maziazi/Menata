@@ -36,32 +36,6 @@ struct HomeView: View {
                     .font(.largeTitle)
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
-                
-                // Data source indicators
-                if !viewModel.isLoading {
-                    let stats = viewModel.getFileSystemItemsCount()
-                    let bundleStats = viewModel.getBundleItemsCount()
-                    
-                    HStack(spacing: 12) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "externaldrive.fill")
-                                .font(.caption2)
-                                .foregroundColor(.green)
-                            Text("Captured: \(stats.rooms + stats.objects)")
-                                .font(.caption2)
-                                .foregroundColor(.black)
-                        }
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "app.badge")
-                                .font(.caption2)
-                                .foregroundColor(.blue)
-                            Text("Samples: \(bundleStats.rooms + bundleStats.objects)")
-                                .font(.caption2)
-                                .foregroundColor(.black)
-                        }
-                    }
-                }
             }
             
             Spacer()
