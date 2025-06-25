@@ -247,7 +247,7 @@ struct ProjectEditView: View {
             }
         }
         .fullScreenCover(isPresented: $showCombineView) {
-            CombineView()
+            CanvasView(isPresented:  $showCombineView)
         }
     }
 }
