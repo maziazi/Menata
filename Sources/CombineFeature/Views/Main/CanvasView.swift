@@ -5,13 +5,6 @@
 //  Created by Muhamad Azis on 23/06/25.
 //
 
-//
-//  CanvasView.swift
-//  Canvas3DDragDrop
-//
-//  Created by Muhamad Azis on 23/06/25.
-//
-
 import SwiftUI
 import RealityKit
 
