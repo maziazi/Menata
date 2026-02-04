@@ -6,4 +6,4 @@ An AR-powered interior design assistant that accelerates 3D modeling by combinin
 Menata is an AR-powered interior design assistant that helps users scan rooms, understand spatial layouts, and experiment with 3D furniture placement in real time. By leveraging Apple’s AR stack, it bridges physical spaces and virtual editing so designers can visualize changes quickly and make informed decisions.
 
 ## Preview
-![Menata Preview](Menata.png)
+![Menata Preview](./Sources/Read/Menata.png)
